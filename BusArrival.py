@@ -1,3 +1,5 @@
+from dotenv import load_dotenv
+load_dotenv()
 from main import base_url
 import httpx
 import os
@@ -13,7 +15,7 @@ class BusArrival:
             params={
                 "BusStopCode":stopcode
             }
-            r=httpx.get(self.url).json()
+            r=httpx.get(self.url, headers=self.headers, params=params).json()
             return r
         else:
             params={
