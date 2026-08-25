@@ -3,13 +3,15 @@ load_dotenv()
 from main import base_url
 import httpx
 import os
-url = base_url+"v3/BusArrival"
+
 key=os.getenv("LTADATAMALL_API_KEY")
-class BusArrival:
-    def __init__(self,api_key:str):
+class Bus:
+    def __init__(self,url=None,api_key:str):
         self.url=url
         self.api_key=api_key
         self.headers={"AccountKey":api_key}
+
+class BusArrival(Bus):
     def get_bus_arrival(self,stopcode:str,serviceno=None):
         if not serviceno:
             params={
