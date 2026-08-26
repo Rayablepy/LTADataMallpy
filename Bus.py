@@ -11,7 +11,7 @@ def make_request(headers,url,params=None):
     elif r.status_code==500:
         raise RuntimeError("LTA backend server encountered an error when processing request.")
     elif r.status_code==429:
-        raise 
+        raise httpx.HTTPError("Rate limit frequency exceeded, please back off your request frequency")
     r.raise_for_status()
     return r.json()
 
