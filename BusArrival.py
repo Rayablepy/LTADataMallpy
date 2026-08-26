@@ -9,6 +9,7 @@ class Bus:
         self.api_key=api_key
         self.arrival=BusArrival(api_key)
         self.services=BusServices(api_key)
+        self.routes=BusRoutes(api_key)
 
 class BusArrival:
     def __init__(self,api_key:str):
@@ -38,6 +39,12 @@ class BusServices:
             r=httpx.get(self.url,headers=self.headers).json()
             return r
 
+class BusRoutes:
+    def __init__(self,api_key:str):
+        self.url=base_url+"BusRoutes"
+        self.headers={"AccountKey":api_key}
+    def get_bus_routes(self):
+        return httpx.get(self.url,headers=self.headers)
 bus=Bus(api_key=key)
 
-print(bus.services.get_bus_services("107M"))
+print(bus.routes.get_bus_routes())
