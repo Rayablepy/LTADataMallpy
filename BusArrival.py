@@ -3,10 +3,20 @@ load_dotenv()
 from main import base_url
 import httpx
 import os
-key=os.getenv("LTADATAMALL_API_KEY")
+
+def make_request(headers,url,params=None):
+    r=httpx.get(url,headers=headers,params=params)
+    if r.status_code==404:
+        raise PermissionError("Invalid API key. Check your LTA data mall API key")
+    r.raise_for_status()
+    return r.json()
+
 class Bus:
     def __init__(self,api_key:str):
+        if not api_key:
+            raise ValueError("API key is missing. Set an API key for the LTA Data Mall API.")
         self.api_key=api_key
+        self.headers={"AccountKey":api_key}
         self.arrival=BusArrival(api_key)
         self.services=BusServices(api_key)
         self.routes=BusRoutes(api_key)
@@ -21,30 +31,27 @@ class BusArrival:
         }
         if serviceno:
             params["ServiceNo"]=serviceno
-        r=httpx.get(self.url,headers=self.headers,params=params).json()
-        return r
+        return make_request(self.headers,self.url,params)
 
 class BusServices:
     def __init__(self,api_key:str):
         self.url=base_url+"BusServices"
         self.headers={"AccountKey":api_key}
     def get_bus_services(self,serviceno=None):
+        params=None
         if serviceno:
-            params={
-                "ServiceNo":serviceno
-            }
-            r=httpx.get(self.url,headers=self.headers,params=params).json()
-            return r
-        else:
-            r=httpx.get(self.url,headers=self.headers).json()
-            return r
+            params={"ServiceNo":serviceno}
+        return make_request(self.headers,self.url,params)
 
 class BusRoutes:
     def __init__(self,api_key:str):
         self.url=base_url+"BusRoutes"
         self.headers={"AccountKey":api_key}
     def get_bus_routes(self):
-        return httpx.get(self.url,headers=self.headers)
+        return make_request(self.headers,self.url)
+
+key="e"#os.getenv("LTADATAMALL_API_KEY")
+
 bus=Bus(api_key=key)
 
 print(bus.routes.get_bus_routes())
