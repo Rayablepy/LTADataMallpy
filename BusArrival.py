@@ -7,7 +7,6 @@ key=os.getenv("LTADATAMALL_API_KEY")
 class Bus:
     def __init__(self,api_key:str):
         self.api_key=api_key
-        self.headers={"AccountKey":api_key}
         self.arrival=BusArrival(api_key)
 
 class BusArrival:
