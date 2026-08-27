@@ -1,14 +1,11 @@
-from dotenv import load_dotenv
-load_dotenv()
-from main import build_headers, build_url, make_request
+
+from main import build_headers, DataMall, build_url, make_request
 import os
 
-class Bus:
+class Bus(DataMall):
     def __init__(self,api_key:str,accept:str|None=None) -> None:
-        if not api_key:
-            raise ValueError("API key is missing. Set an API key for the LTA Data Mall API.")
-        self.api_key=api_key
-        self.headers:dict[str,str]=build_headers(api_key,accept)
+        super().__init__(api_key,accept)
+        self.headers=build_headers(api_key,accept)
         self.arrival=BusArrival(self.headers)
         self.services=BusServices(self.headers)
         self.routes=BusRoutes(self.headers)
@@ -60,9 +57,9 @@ class BusStops:
         if date:
             params={"Date":date}
         return make_request(self.headers,url,params)
-
-key=os.getenv("LTADATAMALL_API_KEY")
-
-bus=Bus(api_key=key)
-
-print(bus.stops.get_bus_stops("01012"))
+    def get_pvolume_od_bus_stop(self,date:str|None=None)->dict:
+        url=build_url("PV/ODBus")
+        params=None
+        if date:
+            params={"Date":date}
+        return make_request(self.headers,url,params)

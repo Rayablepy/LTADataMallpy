@@ -20,3 +20,10 @@ def make_request(headers,url,params=None):
         raise httpx.HTTPError("Rate limit frequency exceeded, please back off your request frequency")
     r.raise_for_status()
     return r.json()
+
+class DataMall:
+    def __init__(self,api_key:str,accept:str|None=None) -> None:
+        if not api_key:
+            raise ValueError("API key is missing. Set an API key for the LTA Data Mall API.")
+        self.api_key=api_key
+        self.headers=build_headers(api_key,accept)
