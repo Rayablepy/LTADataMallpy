@@ -1,10 +1,8 @@
 
-from main import build_headers, DataMall, build_url, make_request
-import os
+from helpers import build_headers, build_url, make_request
 
-class Bus(DataMall):
+class Bus:
     def __init__(self,api_key:str,accept:str|None=None) -> None:
-        super().__init__(api_key,accept)
         self.headers=build_headers(api_key,accept)
         self.arrival=BusArrival(self.headers)
         self.services=BusServices(self.headers)
