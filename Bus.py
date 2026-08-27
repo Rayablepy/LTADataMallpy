@@ -1,20 +1,8 @@
 from dotenv import load_dotenv
 load_dotenv()
-from main import base_url
+from main import base_url, make_request
 import httpx
 import os
-
-def make_request(headers,url,params=None):
-    r=httpx.get(url,headers=headers,params=params)
-    if r.status_code in (404,401,403):
-        raise PermissionError("Invalid API key. Check your LTA data mall API key")
-    elif r.status_code==500:
-        raise RuntimeError("LTA backend server encountered an error when processing request.")
-    elif r.status_code==429:
-        raise httpx.HTTPError("Rate limit frequency exceeded, please back off your request frequency")
-    r.raise_for_status()
-    return r.json()
-
 class Bus:
     def __init__(self,api_key:str):
         if not api_key:
@@ -24,12 +12,23 @@ class Bus:
         self.arrival=BusArrival(api_key)
         self.services=BusServices(api_key)
         self.routes=BusRoutes(api_key)
+        self.stops=BusStops(api_key)
 
-class BusArrival:
+class BaseEndpoint:
+    def __init__(self,api_key:str,endpoint:str,accept:str|None=None):
+        if accept:
+            self.headers={"AccountKey":api_key,
+                            "accept":accept}
+        else:
+            self.headers={
+                "AccountKey":api_key,
+            }
+        self.url=base_url+endpoint
+
+class BusArrival(BaseEndpoint):
     def __init__(self,api_key:str):
-        self.url=base_url+"v3/BusArrival"
-        self.headers={"AccountKey":api_key}
-    def get_bus_arrival(self,stopcode:str,serviceno=None):
+        super().__init__(api_key,"v3/BusArrival")
+    def get_bus_arrival(self,stopcode:str,serviceno:str | None=None):
         params={
             "BusStopCode":stopcode
         }
@@ -41,7 +40,7 @@ class BusServices:
     def __init__(self,api_key:str):
         self.url=base_url+"BusServices"
         self.headers={"AccountKey":api_key}
-    def get_bus_services(self,serviceno=None):
+    def get_bus_services(self,serviceno:str | None =None):
         params=None
         if serviceno:
             params={"ServiceNo":serviceno}
@@ -54,8 +53,22 @@ class BusRoutes:
     def get_bus_routes(self):
         return make_request(self.headers,self.url)
 
+class BusStops:
+    def __init__(self,api_key:str):
+        self.url=base_url+"BusStops"
+        self.headers={"AccountKey":api_key}
+    def get_bus_stops(self,stopcode:str | None=None):
+        params = None
+        if stopcode:
+            params={
+                "BusStopCode":stopcode
+            }
+        return make_request(self.headers,self.url,params)
+    def get_pvolume_bus_stop(self):
+
+
 key=os.getenv("LTADATAMALL_API_KEY")
 
 bus=Bus(api_key=key)
 
-print(bus.routes.get_bus_routes())
+print(bus.stops.get_bus_stops("01012"))
