@@ -1,4 +1,5 @@
 from Bus import Bus
+from Train import Train
 from helpers import build_headers
 
 class DataMall:
@@ -8,3 +9,4 @@ class DataMall:
         self.api_key=api_key
         self.headers=build_headers(api_key,accept)
         self.bus=Bus(api_key,accept)
+        self.train=Train(api_key,accept)
