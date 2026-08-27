@@ -1,6 +1,14 @@
 import httpx
 #base api url
 base_url="https://datamall2.mytransport.sg/ltaodataservice/"
+#helpers
+def build_headers(api_key:str,accept:str|None=None) -> dict[str,str]:
+    headers:dict[str,str]={"AccountKey":api_key}
+    if accept:
+        headers["accept"]=accept
+    return headers
+def build_url(endpoint:str) -> str:
+    return base_url+endpoint
 #request logic
 def make_request(headers,url,params=None):
     r=httpx.get(url,headers=headers,params=params)

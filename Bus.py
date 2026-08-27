@@ -1,34 +1,24 @@
 from dotenv import load_dotenv
 load_dotenv()
-from main import base_url, make_request
-import httpx
+from main import build_headers, build_url, make_request
 import os
+
 class Bus:
-    def __init__(self,api_key:str):
+    def __init__(self,api_key:str,accept:str|None=None) -> None:
         if not api_key:
             raise ValueError("API key is missing. Set an API key for the LTA Data Mall API.")
         self.api_key=api_key
-        self.headers={"AccountKey":api_key}
-        self.arrival=BusArrival(api_key)
-        self.services=BusServices(api_key)
-        self.routes=BusRoutes(api_key)
-        self.stops=BusStops(api_key)
+        self.headers:dict[str,str]=build_headers(api_key,accept)
+        self.arrival=BusArrival(self.headers)
+        self.services=BusServices(self.headers)
+        self.routes=BusRoutes(self.headers)
+        self.stops=BusStops(self.headers)
 
-class BaseEndpoint:
-    def __init__(self,api_key:str,endpoint:str,accept:str|None=None):
-        if accept:
-            self.headers={"AccountKey":api_key,
-                            "accept":accept}
-        else:
-            self.headers={
-                "AccountKey":api_key,
-            }
-        self.url=base_url+endpoint
-
-class BusArrival(BaseEndpoint):
-    def __init__(self,api_key:str):
-        super().__init__(api_key,"v3/BusArrival")
-    def get_bus_arrival(self,stopcode:str,serviceno:str | None=None):
+class BusArrival:
+    def __init__(self,headers:dict[str,str]) -> None:
+        self.headers=headers
+        self.url=build_url("v3/BusArrival")
+    def get_bus_arrival(self,stopcode:str,serviceno:str|None=None) -> dict:
         params={
             "BusStopCode":stopcode
         }
@@ -37,35 +27,39 @@ class BusArrival(BaseEndpoint):
         return make_request(self.headers,self.url,params)
 
 class BusServices:
-    def __init__(self,api_key:str):
-        self.url=base_url+"BusServices"
-        self.headers={"AccountKey":api_key}
-    def get_bus_services(self,serviceno:str | None =None):
+    def __init__(self,headers:dict[str,str]) -> None:
+        self.headers=headers
+        self.url=build_url("BusServices")
+    def get_bus_services(self,serviceno:str|None=None) -> dict:
         params=None
         if serviceno:
             params={"ServiceNo":serviceno}
         return make_request(self.headers,self.url,params)
 
 class BusRoutes:
-    def __init__(self,api_key:str):
-        self.url=base_url+"BusRoutes"
-        self.headers={"AccountKey":api_key}
-    def get_bus_routes(self):
+    def __init__(self,headers:dict[str,str]) -> None:
+        self.headers=headers
+        self.url=build_url("BusRoutes")
+    def get_bus_routes(self) -> dict:
         return make_request(self.headers,self.url)
 
 class BusStops:
-    def __init__(self,api_key:str):
-        self.url=base_url+"BusStops"
-        self.headers={"AccountKey":api_key}
-    def get_bus_stops(self,stopcode:str | None=None):
-        params = None
+    def __init__(self,headers:dict[str,str]) -> None:
+        self.headers=headers
+        self.url=build_url("BusStops")
+    def get_bus_stops(self,stopcode:str|None=None) -> dict:
+        params=None
         if stopcode:
             params={
                 "BusStopCode":stopcode
             }
         return make_request(self.headers,self.url,params)
-    def get_pvolume_bus_stop(self):
-
+    def get_pvolume_bus_stop(self,date:str|None=None) -> dict:
+        url=build_url("PV/Bus")
+        params=None
+        if date:
+            params={"Date":date}
+        return make_request(self.headers,url,params)
 
 key=os.getenv("LTADATAMALL_API_KEY")
 
