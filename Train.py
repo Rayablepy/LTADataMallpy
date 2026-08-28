@@ -15,3 +15,9 @@ class TrainStation:
         if date:
             params={"Date":date}
         return make_request(self.headers,url,params)
+    def get_pvolume_train_station(self,date:str|None=None)->dict:
+        url=build_url("PV/Train")
+        params=None
+        if date:
+            params={"Date":date}
+        return make_request(self.headers,url,params)

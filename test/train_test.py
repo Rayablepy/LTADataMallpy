@@ -8,4 +8,4 @@ from main import DataMall
 key=os.getenv("LTADATAMALL_API_KEY")
 Datamall=DataMall(api_key=key)
 
-print(Datamall.train.station.get_pvolume_od_train_station())
+print(Datamall.train.station.get_pvolume_train_station())
