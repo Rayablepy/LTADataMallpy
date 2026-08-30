@@ -8,4 +8,4 @@ from main import DataMall
 key=os.getenv("LTADATAMALL_API_KEY")
 Datamall=DataMall(api_key=key)
 
-print(Datamall.train.service.get_train_service_alerts())
+print(Datamall.carpark.get_carpark_availability())

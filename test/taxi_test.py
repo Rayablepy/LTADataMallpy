@@ -5,7 +5,10 @@ from dotenv import load_dotenv
 import os
 load_dotenv()
 from main import DataMall
+
+
 key=os.getenv("LTADATAMALL_API_KEY")
+
 Datamall=DataMall(api_key=key)
 
 print(Datamall.taxi.get_taxi_stands())

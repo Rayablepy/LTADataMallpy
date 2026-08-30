@@ -1,4 +1,5 @@
 from Bus import Bus
+from Car import Carpark
 from Taxi import Taxi
 from Train import Train
 from helpers import build_headers
@@ -12,3 +13,4 @@ class DataMall:
         self.bus=Bus(api_key,accept)
         self.train=Train(api_key,accept)
         self.taxi=Taxi(api_key,accept)
+        self.carpark=Carpark(api_key,accept)
