@@ -11,7 +11,7 @@ class DataMall:
         self.api_key=api_key
         self.headers=build_headers(api_key,accept)
         self.transport=Transport(api_key,accept)
-
+        self.traffic=Traffic(api_key,accept)
 class Transport:
     def __init__(self, api_key:str,accept:str|None=None) -> None:
         if not api_key:
