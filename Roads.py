@@ -9,3 +9,9 @@ class Roads:
     def get_carpark_availability(self)->dict:
         url=build_url("CarParkAvailabilityv2")
         return make_request(self.headers,url)
+    def get_road_openings(self)->dict:
+        url=build_url("RoadOpenings")
+        return make_request(self.headers,url)
+    def get_road_works(self)->dict:
+        url=build_url("RoadWorks")
+        return make_request(self.headers,url)

@@ -1,4 +1,5 @@
 from Bus import Bus
+from Infra import Infra
 from Roads import Roads
 from Taxi import Taxi
 from Train import Train
@@ -31,3 +32,4 @@ class Traffic:
         self.headers=build_headers(api_key,accept)
 
         self.roads=Roads(api_key,accept)
+        self.infra=Infra(api_key,accept)
