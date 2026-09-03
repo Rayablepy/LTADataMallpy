@@ -1,3 +1,4 @@
+from ActiveMobility import ActiveMobility
 from Bus import Bus
 from Infra import Infra
 from Roads import Roads
@@ -23,6 +24,7 @@ class Transport:
         self.bus=Bus(api_key,accept)
         self.train=Train(api_key,accept)
         self.taxi=Taxi(api_key,accept)
+        self.active_mobility=ActiveMobility(api_key,accept)
 
 class Traffic:
     def __init__(self, api_key:str,accept:str|None=None) -> None:
