@@ -6,3 +6,9 @@ class Infra:
     def get_faulty_lights(self)->dict:
         url=build_url("FaultyTrafficLights")
         return make_request(self.headers,url)
+    def get_traffic_images(self)->dict:
+        url=build_url("Traffic-Imagesv2")
+        return make_request(self.headers,url)
+    def get_vms_emas(self)->dict:
+        url=build_url("VMS")
+        return make_request(self.headers,url)
