@@ -20,6 +20,7 @@ class TrainStation:
         if date:
             params={"Date":date}
         return make_request(self.headers,url,params)
+    def get
 
 class TrainService:
     def __init__(self,headers:dict[str,str]) -> None:

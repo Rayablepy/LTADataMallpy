@@ -1,5 +1,6 @@
 from ActiveMobility import ActiveMobility
 from Bus import Bus
+from Geo import Geospatial
 from Infra import Infra
 from Roads import Roads
 from Taxi import Taxi
@@ -14,6 +15,7 @@ class DataMall:
         self.headers=build_headers(api_key,accept)
         self.transport=Transport(api_key,accept)
         self.traffic=Traffic(api_key,accept)
+        self.geospatial=Geospatial(api_key,accept)
 class Transport:
     def __init__(self, api_key:str,accept:str|None=None) -> None:
         if not api_key:
