@@ -20,11 +20,24 @@ class TrainStation:
         if date:
             params={"Date":date}
         return make_request(self.headers,url,params)
-    def get
-
+    def get_maintenance(self)->dict:
+        url=build_url("v2/FacilitiesMaintenance")
+        return make_request(self.headers,url)
 class TrainService:
     def __init__(self,headers:dict[str,str]) -> None:
         self.headers=headers
     def get_train_service_alerts(self)->dict:
         url=build_url("TrainServiceAlerts")
         return make_request(self.headers,url)
+    def get_crowd_density(self,line:str)->dict:
+        url=build_url("PCDRealTime")
+        params={
+            "TrainLine":line
+        }
+        return make_request(self.headers,url,params)
+    def get_crowd_density_forecast(self,line:str)->dict:
+        url=build_url("PCDForecast")
+        params={
+            "TrainLine":line
+        }
+        return make_request(self.headers, url, params)

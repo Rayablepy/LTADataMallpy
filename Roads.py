@@ -21,3 +21,6 @@ class Roads:
     def get_traffic_speed_bands(self)->dict:
         url=build_url("v4/TrafficSpeedBands")
         return make_request(self.headers,url)
+    def get_traffic_flows(self)->dict:
+        url=build_url("TrafficFlow")
+        return make_request(self.headers,url)
