@@ -12,3 +12,10 @@ class Infra:
     def get_vms_emas(self)->dict:
         url=build_url("VMS")
         return make_request(self.headers,url)
+    def get_ev_charge_points(self,postalcode:str)->dict:
+        url=build_url("EVChargingPoints")
+        params={"PostalCode":postalcode}
+        return make_request(self.headers,url,params)
+    def get_ev_charge_points_batch(self)->dict:
+        url=build_url("EVCBatch")
+        return make_request(self.headers,url)

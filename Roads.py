@@ -24,3 +24,6 @@ class Roads:
     def get_traffic_flows(self)->dict:
         url=build_url("TrafficFlow")
         return make_request(self.headers,url)
+    def get_flood_alerts(self)->dict:
+        url=build_url("PubFloodAlerts")
+        return make_request(self.headers,url)
