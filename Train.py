@@ -41,3 +41,12 @@ class TrainService:
             "TrainLine":line
         }
         return make_request(self.headers, url, params)
+    def get_gtfs_train_schedule(self)->dict:
+        url=build_url("GTFSScheduleTrain")
+        return make_request(self.headers, url)
+    def get_gtfs_train_service_real_time(self)->dict:
+        url=build_url("GTFSRealTimeTrainServiceAlerts")
+        return make_request(self.headers, url)
+    def get_gtfs_train_trip_update(self)->dict:
+        url="GTFSRealtimeTrainTripUpdates"
+        return make_request(self.headers, url)
