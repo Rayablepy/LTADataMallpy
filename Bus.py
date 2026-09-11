@@ -34,8 +34,12 @@ class BusServices:
 class BusRoutes:
     def __init__(self,headers:dict[str,str]) -> None:
         self.headers=headers
-        self.url=build_url("BusRoutes")
+
     def get_bus_routes(self) -> dict:
+        self.url = build_url("BusRoutes")
+        return make_request(self.headers,self.url)
+    def get_planned_routes(self)->dict:
+        self.url = build_url("PlannedBusRoutes")
         return make_request(self.headers,self.url)
 
 class BusStops:
