@@ -53,14 +53,11 @@ class BusStops:
                 "BusStopCode":stopcode
             }
         return make_request(self.headers,self.url,params)
-    def get_pvolume_bus_stop(self,date:str|None=None) -> dict:
-        url=build_url("PV/Bus")
-        params=None
-        if date:
-            params={"Date":date}
-        return make_request(self.headers,url,params)
-    def get_pvolume_od_bus_stop(self,date:str|None=None)->dict:
-        url=build_url("PV/ODBus")
+    def get_pvolume_bus_stop(self,date:str|None=None,origin_destination:bool|None=None) -> dict:
+        if origin_destination:
+            url=build_url("PV/ODBus")
+        else:
+            url=build_url("PV/Bus")
         params=None
         if date:
             params={"Date":date}
