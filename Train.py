@@ -48,5 +48,5 @@ class TrainService:
         url=build_url("GTFSRealTimeTrainServiceAlerts")
         return make_request(self.headers, url)
     def get_gtfs_train_trip_update(self)->dict:
-        url="GTFSRealtimeTrainTripUpdates"
+        url=build_url("GTFSRealtimeTrainTripUpdates")
         return make_request(self.headers, url)
