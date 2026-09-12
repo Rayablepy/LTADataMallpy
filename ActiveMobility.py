@@ -1,4 +1,5 @@
-from helpers import build_headers, build_url, make_request
+from helpers import build_headers, build_url, make_request, make_paginated_request
+
 
 class ActiveMobility:
     def __init__(self, api_key:str, accept: str| None = None)->None:
@@ -11,6 +12,6 @@ class ActiveMobility:
         }
         if dist:
             params["Dist"]=dist
-        return make_request(self.headers,self.url,params)
+        return make_paginated_request(self.headers,self.url,params)
 
 

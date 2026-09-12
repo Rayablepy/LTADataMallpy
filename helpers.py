@@ -21,3 +21,20 @@ def make_request(headers,url,params=None):
         raise httpx.HTTPError("Rate limit frequency exceeded, please back off your request frequency")
     r.raise_for_status()
     return r.json()
+
+def make_paginated_request(headers:dict[str,str],url:str,params:dict[str,str] | None = None) -> dict:
+    params = dict(params or {})
+    skip = 0
+    combined = None
+    while True:
+        params["$skip"] = skip
+        page = make_request(headers, url, params)
+        batch = page.get("value", [])
+        if combined is None:
+            combined = page
+        else:
+            combined["value"].extend(batch)
+        if len(batch) < 500:
+            break
+        skip += 500
+    return combined

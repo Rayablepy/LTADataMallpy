@@ -1,5 +1,6 @@
 
-from helpers import build_headers, build_url, make_request
+from helpers import build_headers, build_url, make_request, make_paginated_request
+
 
 class Bus:
     def __init__(self,api_key:str,accept:str|None=None) -> None:
@@ -29,7 +30,7 @@ class BusServices:
         params=None
         if serviceno:
             params={"ServiceNo":serviceno}
-        return make_request(self.headers,self.url,params)
+        return make_paginated_request(self.headers,self.url,params)
 
 class BusRoutes:
     def __init__(self,headers:dict[str,str]) -> None:
@@ -37,7 +38,7 @@ class BusRoutes:
 
     def get_bus_routes(self) -> dict:
         self.url = build_url("BusRoutes")
-        return make_request(self.headers,self.url)
+        return make_paginated_request(self.headers,self.url)
     def get_planned_routes(self)->dict:
         self.url = build_url("PlannedBusRoutes")
         return make_request(self.headers,self.url)
@@ -52,7 +53,7 @@ class BusStops:
             params={
                 "BusStopCode":stopcode
             }
-        return make_request(self.headers,self.url,params)
+        return make_paginated_request(self.headers,self.url,params)
     def get_pvolume_bus_stop(self,date:str|None=None,origin_destination:bool|None=None) -> dict:
         if origin_destination:
             url=build_url("PV/ODBus")
