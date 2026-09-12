@@ -11,8 +11,22 @@ def build_headers(api_key:str,accept:str|None=None) -> dict[str,str]:
 def build_url(endpoint:str) -> str:
     return base_url+endpoint
 
+client = httpx.Client()
+def create_client()->None|httpx.Client:
+    global client
+    if not client:
+        client = httpx.Client(timeout=30.0)
+    return client
+
+#may be open to exports
+def close_client()->None:
+    global client
+    if not client:
+        client.close()
+        client = None
+
 def make_request(headers,url,params=None):
-    r=httpx.get(url,headers=headers,params=params)
+    r=create_client().get(url,headers=headers,params=params)
     if r.status_code in (404,401,403):
         raise PermissionError("Invalid API key. Check your LTA data mall API key")
     elif r.status_code==500:
