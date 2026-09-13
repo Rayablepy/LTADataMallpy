@@ -39,7 +39,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/project/ltadatamall/
+      url: https://pypi.org/project/singapore-lta-datamall/
 
     steps:
       - name: Retrieve release distributions
