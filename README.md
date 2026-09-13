@@ -14,29 +14,11 @@ Built on `httpx`, it ships with automatic pagination for endpoints returning mor
 
 ## Installation
 
-### From PyPI (once published)
+### From PyPI 
 
 ```bash
 pip install singapore-lta-datamall
 ```
-
-### From source (editable / development)
-
-```bash
-git clone https://github.com/Rayablepy/LTADataMallpy
-cd LTADataMallpy
-pip install -e .
-```
-
-### Building the distribution
-
-```bash
-uv build          # or: python -m build
-```
-
-Produces `dist/singapore_lta_datamall-<version>.tar.gz` (sdist) and `dist/singapore_lta_datamall-<version>-py3-none-any.whl`.
-
-Requirements: `httpx>=0.28.1` and `python-dotenv>=1.2.3` (the latter is for loading your API key from a `.env` file in your own scripts).
 
 ## Getting an API key
 
