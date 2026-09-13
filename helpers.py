@@ -1,5 +1,5 @@
 import httpx
-
+import time
 base_url="https://datamall2.mytransport.sg/ltaodataservice/"
 
 def build_headers(api_key:str,accept:str|None=None) -> dict[str,str]:
@@ -25,14 +25,40 @@ def close_client()->None:
         client.close()
         client = None
 
+
+'''{
+  "error": {
+    "code": r.status_code,
+    "message": "Rate limit frequency exceeded, please back off your request frequency",
+    "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+  }
+}'''
 def make_request(headers,url,params=None):
     r=create_client().get(url,headers=headers,params=params)
     if r.status_code in (404,401,403):
-        raise PermissionError("Invalid API key. Check your LTA data mall API key")
+        raise PermissionError({
+            "error": {
+                "code": r.status_code,
+                "message": "Invalid API key. Check your LTA data mall API key.",
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            }
+        })
     elif r.status_code==500:
-        raise RuntimeError("LTA backend server encountered an error when processing request.")
+        raise RuntimeError(  {
+            "error": {
+                "code": r.status_code,
+                "message": "LTA backend server encountered an error when processing request.",
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            }
+        })
     elif r.status_code==429:
-        raise httpx.HTTPError("Rate limit frequency exceeded, please back off your request frequency")
+        raise httpx.HTTPError({
+            "error": {
+                "code": r.status_code,
+                "message": "Rate limit frequency exceeded, please back off your request frequency",
+                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            }
+        })
     r.raise_for_status()
     return r.json()
 
