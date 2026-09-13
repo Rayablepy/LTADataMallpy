@@ -1,4 +1,4 @@
-from helpers import build_headers, build_url, make_request
+from .helpers import build_headers, build_url, make_request
 
 class Train:
     def __init__(self,api_key:str,accept:str|None=None)->None:
@@ -8,14 +8,11 @@ class Train:
 class TrainStation:
     def __init__(self,headers:dict[str,str]) -> None:
         self.headers=headers
-    def get_pvolume_od_train_station(self,date:str|None=None)->dict:
-        url=build_url("PV/ODTrain")
-        params=None
-        if date:
-            params={"Date":date}
-        return make_request(self.headers,url,params)
-    def get_pvolume_train_station(self,date:str|None=None)->dict:
-        url=build_url("PV/Train")
+    def get_pvolume_train_station(self,date:str|None=None,origin_destination:bool|None=None)->dict:
+        if origin_destination:
+            url = build_url("PV/ODTrain")
+        else:
+            url=build_url("PV/Train")
         params=None
         if date:
             params={"Date":date}
