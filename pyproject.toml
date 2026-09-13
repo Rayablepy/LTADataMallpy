@@ -1,10 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "ltadatamall"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Python wrapper for the LTA DataMall public transport API"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+authors = [
+    { name = "Muhammad Rayhan", email = "rayhan11.0808@gmail.com" },
+]
+keywords = [
+    "lta",
+    "datamall",
+    "singapore",
+    "transport",
+    "bus",
+    "train",
+    "taxi",
+    "traffic",
+    "api",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
 dependencies = [
     "httpx>=0.28.1",
     "python-dotenv>=1.2.3",
+]
+
+[project.urls]
+Homepage = "https://github.com/Rayablepy/LTADataMallpy"
+Source = "https://github.com/Rayablepy/LTADataMallpy"
+Issues = "https://github.com/Rayablepy/LTADataMallpy/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/LTADataMallpy"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "src/LTADataMallpy",
+    "LICENSE",
+    "README.md",
 ]

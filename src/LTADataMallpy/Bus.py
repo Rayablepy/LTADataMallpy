@@ -1,5 +1,5 @@
 
-from helpers import build_headers, build_url, make_request, make_paginated_request
+from .helpers import build_headers, build_url, make_request, make_paginated_request
 
 
 class Bus:

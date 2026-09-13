@@ -1,4 +1,4 @@
-from helpers import build_headers, build_url, make_request
+from .helpers import build_headers, build_url, make_request
 
 class Geospatial:
     def __init__(self,api_key:str,accept:str|None=None)->None:
