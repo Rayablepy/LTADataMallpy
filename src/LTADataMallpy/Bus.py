@@ -1,6 +1,6 @@
 
 from .helpers import build_headers, build_url, make_request, make_paginated_request
-
+from pydantic import BaseModel
 
 class Bus:
     def __init__(self,api_key:str,accept:str|None=None) -> None:
