@@ -1,6 +1,14 @@
 
 from .helpers import build_headers, build_url, make_request, make_paginated_request
-from pydantic import BaseModel
+from .models import (
+    BusArrivalResponse,
+    BusRoute,
+    BusService,
+    BusStop,
+    LtaResult,
+    PassengerVolumeDownload,
+    PlannedBusRoute,
+)
 
 class Bus:
     def __init__(self,api_key:str,accept:str|None=None) -> None:
@@ -14,47 +22,47 @@ class BusArrival:
     def __init__(self,headers:dict[str,str]) -> None:
         self.headers=headers
         self.url=build_url("v3/BusArrival")
-    def get_bus_arrival(self,stopcode:str,serviceno:str|None=None) -> dict:
+    def get_bus_arrival(self,stopcode:str,serviceno:str|None=None) -> BusArrivalResponse:
         params={
             "BusStopCode":stopcode
         }
         if serviceno:
             params["ServiceNo"]=serviceno
-        return make_request(self.headers,self.url,params)
+        return BusArrivalResponse.model_validate(make_request(self.headers,self.url,params))
 
 class BusServices:
     def __init__(self,headers:dict[str,str]) -> None:
         self.headers=headers
         self.url=build_url("BusServices")
-    def get_bus_services(self,serviceno:str|None=None) -> dict:
+    def get_bus_services(self,serviceno:str|None=None) -> LtaResult[BusService]:
         params=None
         if serviceno:
             params={"ServiceNo":serviceno}
-        return make_paginated_request(self.headers,self.url,params)
+        return LtaResult[BusService].model_validate(make_paginated_request(self.headers,self.url,params))
 
 class BusRoutes:
     def __init__(self,headers:dict[str,str]) -> None:
         self.headers=headers
 
-    def get_bus_routes(self) -> dict:
+    def get_bus_routes(self) -> LtaResult[BusRoute]:
         self.url = build_url("BusRoutes")
-        return make_paginated_request(self.headers,self.url)
-    def get_planned_routes(self)->dict:
+        return LtaResult[BusRoute].model_validate(make_paginated_request(self.headers,self.url))
+    def get_planned_routes(self)->LtaResult[PlannedBusRoute]:
         self.url = build_url("PlannedBusRoutes")
-        return make_request(self.headers,self.url)
+        return LtaResult[PlannedBusRoute].model_validate(make_request(self.headers,self.url))
 
 class BusStops:
     def __init__(self,headers:dict[str,str]) -> None:
         self.headers=headers
         self.url=build_url("BusStops")
-    def get_bus_stops(self,stopcode:str|None=None) -> dict:
+    def get_bus_stops(self,stopcode:str|None=None) -> LtaResult[BusStop]:
         params=None
         if stopcode:
             params={
                 "BusStopCode":stopcode
             }
-        return make_paginated_request(self.headers,self.url,params)
-    def get_pvolume_bus_stop(self,date:str|None=None,origin_destination:bool|None=None) -> dict:
+        return LtaResult[BusStop].model_validate(make_paginated_request(self.headers,self.url,params))
+    def get_pvolume_bus_stop(self,date:str|None=None,origin_destination:bool|None=None) -> LtaResult[PassengerVolumeDownload]:
         if origin_destination:
             url=build_url("PV/ODBus")
         else:
@@ -62,4 +70,4 @@ class BusStops:
         params=None
         if date:
             params={"Date":date}
-        return make_request(self.headers,url,params)
+        return LtaResult[PassengerVolumeDownload].model_validate(make_request(self.headers,url,params))
