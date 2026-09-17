@@ -11,19 +11,19 @@ def build_headers(api_key:str,accept:str|None=None) -> dict[str,str]:
 def build_url(endpoint:str) -> str:
     return base_url+endpoint
 
-_client = None
+client = None
 def create_client() -> httpx.Client:
-    global _client
-    if _client is None:
-        _client = httpx.Client(timeout=30.0)
-    return _client
+    global client
+    if client is None:
+        client = httpx.Client(timeout=30.0)
+    return client
 
 #may be open to exports
 def close_client() -> None:
-    global _client
-    if _client is not None:
-        _client.close()
-        _client = None
+    global client
+    if client is not None:
+        client.close()
+        client = None
 
 #Custom exceptions, open to updates
 class DataMallPermissionError(Exception):

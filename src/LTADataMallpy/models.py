@@ -88,7 +88,7 @@ class PlannedBusRoute(DataMallModel):
 
 
 class PassengerVolumeDownload(DataMallModel):
-    file_url: str
+    file_url: str = Field(alias="Link")
 
 
 class FacilityMaintenance(DataMallModel):
@@ -146,8 +146,9 @@ class PlatformCrowdDensityForecast(DataMallModel):
     stations: list[ForecastCrowdDensityStation]
 
 
-class GtfsScheduleDownload(DataMallModel):
-    file_url: str
+class GtfsScheduleDownload(BaseModel):
+    file_url: str = Field(alias="link")
+    timestamp: str
 
 
 class GtfsFeedHeader(BaseModel):
