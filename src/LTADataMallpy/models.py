@@ -1,4 +1,4 @@
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -89,3 +89,81 @@ class PlannedBusRoute(DataMallModel):
 
 class PassengerVolumeDownload(DataMallModel):
     file_url: str
+
+
+class FacilityMaintenance(DataMallModel):
+    line: str
+    station_code: str
+    station_name: str
+    lift_id: str | None = Field(alias="LiftID")
+    lift_desc: str
+
+
+class TrainAffectedSegment(DataMallModel):
+    line: str
+    direction: str
+    stations: str
+    free_public_bus: str
+    free_mrt_shuttle: str = Field(alias="FreeMRTShuttle")
+    mrt_shuttle_direction: str = Field(alias="MRTShuttleDirection")
+
+
+class TrainServiceAlertMessage(DataMallModel):
+    content: str
+    created_date: str
+
+
+class TrainServiceAlert(DataMallModel):
+    status: int
+    affected_segments: list[TrainAffectedSegment]
+    message: list[TrainServiceAlertMessage]
+
+
+class TrainServiceAlertsResponse(DataMallModel):
+    odata_metadata: str | None = Field(default=None, alias="odata.metadata")
+    value: TrainServiceAlert = Field(alias="value")
+
+
+class PlatformCrowdDensityRealTime(DataMallModel):
+    station: str
+    start_time: str
+    end_time: str
+    crowd_level: str
+
+
+class CrowdDensityInterval(DataMallModel):
+    start: str
+    crowd_level: str
+
+
+class ForecastCrowdDensityStation(DataMallModel):
+    station: str
+    interval: list[CrowdDensityInterval]
+
+
+class PlatformCrowdDensityForecast(DataMallModel):
+    date: str
+    stations: list[ForecastCrowdDensityStation]
+
+
+class GtfsScheduleDownload(DataMallModel):
+    file_url: str
+
+
+class GtfsFeedHeader(BaseModel):
+    gtfs_realtime_version: str
+    incrementality: str
+    timestamp: str
+
+
+class GtfsFeedEntity(BaseModel):
+    id: str
+    is_deleted: bool | None = None
+    trip_update: dict[str, Any] | None = None
+    vehicle: dict[str, Any] | None = None
+    alert: dict[str, Any] | None = None
+
+
+class GtfsRealtimeFeed(BaseModel):
+    header: GtfsFeedHeader
+    entity: list[GtfsFeedEntity]
