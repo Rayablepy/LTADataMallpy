@@ -262,3 +262,69 @@ class PubFloodAlert(DataMallModel):
     area_desc: str = Field(alias="areaDesc")
     circle: str = Field(alias="circle")
     status: str = Field(alias="status")
+
+
+class FaultyTrafficLight(DataMallModel):
+    alarm_id: str = Field(alias="AlarmID")
+    node_id: str = Field(alias="NodeID")
+    type: int
+    start_date: str
+    end_date: str | None = None
+    message: str
+
+
+class TrafficCamera(DataMallModel):
+    camera_id: int = Field(alias="CameraID")
+    latitude: float
+    longitude: float
+    image_link: str
+
+
+class VmsMessage(DataMallModel):
+    equipment_id: str = Field(alias="EquipmentID")
+    latitude: float
+    longitude: float
+    message: str
+
+
+class BicycleParking(DataMallModel):
+    latitude: float
+    longitude: float
+    rack_type: str
+    rack_count: int
+    shelter_indicator: str
+
+
+class GeospatialLayerDownload(DataMallModel):
+    link: str
+
+
+class EvBatchDownload(DataMallModel):
+    link: str
+
+
+class EvChargingPoint(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    status: int | None = Field(default=None, alias="status")
+    operation_hours: str | None = Field(default=None, alias="operationHours")
+    operator: str | None = Field(default=None, alias="operator")
+    position: str | None = Field(default=None, alias="position")
+    name: str | None = Field(default=None, alias="name")
+    id: str | None = Field(default=None, alias="id")
+    plug_type: str | None = Field(default=None, alias="plugType")
+    power_rating: str | float | None = Field(default=None, alias="powerRating")
+    charging_speed: float | None = Field(default=None, alias="chargingSpeed")
+    price: float | None = Field(default=None, alias="price")
+    price_type: str | None = Field(default=None, alias="priceType")
+    ev_cp_id: str | None = Field(default=None, alias="evCpId")
+
+
+class EvChargingStation(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    address: str = Field(alias="address")
+    name: str = Field(alias="name")
+    longitude: float = Field(alias="longtitude")
+    latitude: float = Field(alias="latitude")
+    location_id: str = Field(alias="locationId")
+    status: str = Field(alias="status")
+    charging_points: list[EvChargingPoint] = Field(default_factory=list, alias="chargingPoints")
