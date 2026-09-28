@@ -168,3 +168,97 @@ class GtfsFeedEntity(BaseModel):
 class GtfsRealtimeFeed(BaseModel):
     header: GtfsFeedHeader
     entity: list[GtfsFeedEntity]
+
+
+class TaxiAvailability(DataMallModel):
+    latitude: float
+    longitude: float
+
+
+class TaxiStand(DataMallModel):
+    taxi_code: str
+    latitude: float
+    longitude: float
+    bfa: str
+    ownership: str
+    type: str
+    name: str
+
+
+class CarParkAvailability(DataMallModel):
+    car_park_id: str = Field(alias="CarParkID")
+    area: str
+    development: str
+    location: str
+    available_lots: int
+    lot_type: str
+    agency: str
+
+
+class EstimatedTravelTime(DataMallModel):
+    name: str
+    direction: int
+    far_end_point: str
+    start_point: str
+    end_point: str
+    est_time: int
+
+
+class RoadOpening(DataMallModel):
+    event_id: str = Field(alias="EventID")
+    start_date: str
+    end_date: str
+    svc_dept: str
+    road_name: str
+    other: str
+
+
+class RoadWork(DataMallModel):
+    event_id: str = Field(alias="EventID")
+    start_date: str
+    end_date: str
+    svc_dept: str
+    road_name: str
+    other: str
+
+
+class TrafficIncident(DataMallModel):
+    type: str
+    latitude: float
+    longitude: float
+    message: str
+
+
+class TrafficSpeedBand(DataMallModel):
+    link_id: int = Field(alias="LinkID")
+    road_name: str
+    road_category: int
+    speed_band: int
+    minimum_speed: int
+    maximum_speed: int
+    start_lon: float
+    start_lat: float
+    end_lon: float
+    end_lat: float
+
+
+class TrafficFlowDownload(DataMallModel):
+    link: str
+
+
+class PubFloodAlert(DataMallModel):
+    alert_id: str = Field(alias="alertId")
+    date_time: str = Field(alias="dateTime")
+    msg_type: str = Field(alias="msgType")
+    event: str = Field(alias="event")
+    response_type: str = Field(alias="responseType")
+    urgency: str = Field(alias="urgency")
+    severity: str = Field(alias="severity")
+    expires: str = Field(alias="expires")
+    sender_name: str = Field(alias="senderName")
+    headline: str = Field(alias="headline")
+    description: str = Field(alias="description")
+    instruction: str = Field(alias="instruction")
+    area_desc: str = Field(alias="areaDesc")
+    circle: str = Field(alias="circle")
+    status: str = Field(alias="status")
