@@ -1,5 +1,5 @@
 import httpx
-import time
+
 base_url="https://datamall2.mytransport.sg/ltaodataservice/"
 
 def build_headers(api_key:str,accept:str|None=None) -> dict[str,str]:
@@ -26,42 +26,56 @@ def close_client() -> None:
         client = None
 
 #Custom exceptions, open to updates
-class DataMallPermissionError(Exception):
-    """Raised when a data mall API key is invalid"""
+class DataMallError(Exception):
+    """Base class for LTA DataMall API errors"""
+
+    def __init__(self, status_code: int, detail: str) -> None:
+        self.status_code = status_code
+        self.detail = detail
+        super().__init__(f"{status_code} {detail}")
+
+
+class DataMallPermissionError(DataMallError):
+    """Raised when a data mall API key is invalid or lacks access to the api"""
     pass
-class DataMallBackendError(Exception):
+class DataMallNotFoundError(DataMallError):
+    """Raised when the requested data is not available for this account"""
+    pass
+class DataMallBackendError(DataMallError):
     """Raised when the LTA backend servers encounter error(s) in processing requests"""
     pass
-class DataMallRateLimitError(Exception):
+class DataMallRateLimitError(DataMallError):
     """Raised when the API rate limit is exceeded"""
     pass
 
+
+def extract_error_detail(response) -> str:
+    try:
+        body = response.json()
+    except Exception:
+        return response.reason_phrase or "Unknown error"
+    error = body.get("error")
+    if isinstance(error, dict):
+        message = error.get("message")
+        if message:
+            return str(message)
+    value = body.get("value")
+    if isinstance(value, dict) and isinstance(value.get("status"), dict):
+        message = value["status"].get("message")
+        if message:
+            return str(message)
+    return response.reason_phrase or "Unknown error"
+
 def make_request(headers,url,params=None):
     r=create_client().get(url,headers=headers,params=params)
-    if r.status_code in (404,401,403):
-        raise DataMallPermissionError({
-            "error": {
-                "code": r.status_code,
-                "message": "Invalid API key. Check your LTA data mall API key.",
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            }
-        })
-    elif r.status_code==500:
-        raise DataMallBackendError(  {
-            "error": {
-                "code": r.status_code,
-                "message": "LTA backend server encountered an error when processing request.",
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            }
-        })
+    if r.status_code in (401,403):
+        raise DataMallPermissionError(r.status_code, extract_error_detail(r))
+    elif r.status_code in (404,):
+        raise DataMallNotFoundError(r.status_code, extract_error_detail(r))
+    elif r.status_code in (500,502,503):
+        raise DataMallBackendError(r.status_code, extract_error_detail(r))
     elif r.status_code==429:
-        raise DataMallRateLimitError({
-            "error": {
-                "code": r.status_code,
-                "message": "Rate limit frequency exceeded, please back off your request frequency",
-                "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-            }
-        })
+        raise DataMallRateLimitError(r.status_code, extract_error_detail(r))
     r.raise_for_status()
     return r.json()
 
