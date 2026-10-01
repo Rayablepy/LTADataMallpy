@@ -1,7 +1,6 @@
 from .helpers import build_headers, build_url, make_request
 from .models import (
     FacilityMaintenance,
-    GtfsRealtimeFeed,
     GtfsScheduleDownload,
     LtaResult,
     PassengerVolumeDownload,
@@ -51,9 +50,9 @@ class TrainService:
     def get_gtfs_train_schedule(self)->LtaResult[GtfsScheduleDownload]:
         url=build_url("GTFSScheduleTrain")
         return LtaResult[GtfsScheduleDownload].model_validate(make_request(self.headers, url))
-    def get_gtfs_train_service_real_time(self)->GtfsRealtimeFeed:
+    def get_gtfs_train_service_real_time(self)->LtaResult[GtfsScheduleDownload]:
         url=build_url("GTFSRealTimeTrainServiceAlerts")
-        return GtfsRealtimeFeed.model_validate(make_request(self.headers, url))
-    def get_gtfs_train_trip_update(self)->GtfsRealtimeFeed:
+        return LtaResult[GtfsScheduleDownload].model_validate(make_request(self.headers, url))
+    def get_gtfs_train_trip_update(self)->LtaResult[GtfsScheduleDownload]:
         url=build_url("GTFSRealtimeTrainTripUpdates")
-        return GtfsRealtimeFeed.model_validate(make_request(self.headers, url))
+        return LtaResult[GtfsScheduleDownload].model_validate(make_request(self.headers, url))

@@ -1,4 +1,4 @@
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -149,25 +149,6 @@ class PlatformCrowdDensityForecast(DataMallModel):
 class GtfsScheduleDownload(BaseModel):
     file_url: str = Field(alias="link")
     timestamp: str
-
-
-class GtfsFeedHeader(BaseModel):
-    gtfs_realtime_version: str
-    incrementality: str
-    timestamp: str
-
-
-class GtfsFeedEntity(BaseModel):
-    id: str
-    is_deleted: bool | None = None
-    trip_update: dict[str, Any] | None = None
-    vehicle: dict[str, Any] | None = None
-    alert: dict[str, Any] | None = None
-
-
-class GtfsRealtimeFeed(BaseModel):
-    header: GtfsFeedHeader
-    entity: list[GtfsFeedEntity]
 
 
 class TaxiAvailability(DataMallModel):
