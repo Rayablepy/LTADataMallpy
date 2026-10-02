@@ -1,12 +1,19 @@
-from typing import Generic, TypeVar
+from typing import Annotated, Generic, TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 
 T = TypeVar("T")
 
 
 def to_pascal(field_name: str) -> str:
     return "".join(word.capitalize() for word in field_name.split("_"))
+
+
+def _empty_str_to_none(value):
+    return None if value == "" else value
+
+
+EmptyableInt = Annotated[int | None, BeforeValidator(_empty_str_to_none)]
 
 
 class DataMallModel(BaseModel):
@@ -213,10 +220,10 @@ class TrafficIncident(DataMallModel):
 class TrafficSpeedBand(DataMallModel):
     link_id: int = Field(alias="LinkID")
     road_name: str
-    road_category: int
-    speed_band: int
-    minimum_speed: int
-    maximum_speed: int
+    road_category: EmptyableInt
+    speed_band: EmptyableInt
+    minimum_speed: EmptyableInt
+    maximum_speed: EmptyableInt
     start_lon: float
     start_lat: float
     end_lon: float
@@ -284,28 +291,50 @@ class EvBatchDownload(DataMallModel):
     link: str
 
 
+class EvChargingPointId(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    id: str = Field(alias="id")
+    ev_cp_id: str = Field(alias="evCpId")
+    status: str = Field(alias="status")
+
+
+class EvPlugType(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    plug_type: str = Field(alias="plugType")
+    power_rating: str | float | None = Field(default=None, alias="powerRating")
+    charging_speed: str | float | None = Field(default=None, alias="chargingSpeed")
+    price: str | float | None = Field(default=None, alias="price")
+    price_type: str | None = Field(default=None, alias="priceType")
+    ev_ids: list[EvChargingPointId] = Field(default_factory=list, alias="evIds")
+
+
 class EvChargingPoint(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
-    status: int | None = Field(default=None, alias="status")
-    operation_hours: str | None = Field(default=None, alias="operationHours")
-    operator: str | None = Field(default=None, alias="operator")
-    position: str | None = Field(default=None, alias="position")
-    name: str | None = Field(default=None, alias="name")
-    id: str | None = Field(default=None, alias="id")
-    plug_type: str | None = Field(default=None, alias="plugType")
-    power_rating: str | float | None = Field(default=None, alias="powerRating")
-    charging_speed: float | None = Field(default=None, alias="chargingSpeed")
-    price: float | None = Field(default=None, alias="price")
-    price_type: str | None = Field(default=None, alias="priceType")
-    ev_cp_id: str | None = Field(default=None, alias="evCpId")
+    status: str = Field(alias="status")
+    operating_hours: str = Field(default="", alias="operatingHours")
+    operator: str = Field(default="", alias="operator")
+    position: str = Field(default="", alias="position")
+    name: str = Field(default="", alias="name")
+    id: str = Field(default="", alias="id")
+    plug_types: list[EvPlugType] = Field(default_factory=list, alias="plugTypes")
 
 
 class EvChargingStation(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     address: str = Field(alias="address")
     name: str = Field(alias="name")
-    longitude: float = Field(alias="longtitude")
+    longitude: float = Field(alias="longitude")
     latitude: float = Field(alias="latitude")
     location_id: str = Field(alias="locationId")
     status: str = Field(alias="status")
     charging_points: list[EvChargingPoint] = Field(default_factory=list, alias="chargingPoints")
+
+
+class EvChargingData(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    ev_locations_data: list[EvChargingStation] = Field(alias="evLocationsData")
+
+
+class EvChargingResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    value: EvChargingData = Field(alias="value")

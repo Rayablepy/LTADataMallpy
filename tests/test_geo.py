@@ -43,7 +43,7 @@ def test_geo_layer() -> None:
         f"(ID={GEO_LAYER_ID})",
     )
 
-    result = client.transport.geo.get_geo_layer(GEO_LAYER_ID)
+    result = client.geospatial.get_geo_layer(GEO_LAYER_ID)
     assert isinstance(result, LtaResult[GeospatialLayerDownload])
     assert result.value, "no geospatial downloads returned"
     assert result.value[0].link

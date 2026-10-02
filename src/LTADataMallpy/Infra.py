@@ -1,7 +1,7 @@
 from .helpers import build_headers, build_url, make_request, make_paginated_request
 from .models import (
     EvBatchDownload,
-    EvChargingStation,
+    EvChargingResponse,
     FaultyTrafficLight,
     LtaResult,
     TrafficCamera,
@@ -21,10 +21,10 @@ class Infra:
     def get_vms_emas(self)->LtaResult[VmsMessage]:
         url=build_url("VMS")
         return LtaResult[VmsMessage].model_validate(make_request(self.headers,url))
-    def get_ev_charge_points(self,postalcode:str)->LtaResult[EvChargingStation]:
+    def get_ev_charge_points(self,postalcode:str)->EvChargingResponse:
         url=build_url("EVChargingPoints")
         params={"PostalCode":postalcode}
-        return LtaResult[EvChargingStation].model_validate(make_request(self.headers,url,params))
+        return EvChargingResponse.model_validate(make_request(self.headers,url,params))
     def get_ev_charge_points_batch(self)->LtaResult[EvBatchDownload]:
         url=build_url("EVCBatch")
         return LtaResult[EvBatchDownload].model_validate(make_request(self.headers,url))

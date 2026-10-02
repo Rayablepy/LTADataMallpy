@@ -23,7 +23,7 @@ class Roads:
         return LtaResult[CarParkAvailability].model_validate(make_paginated_request(self.headers,url))
     def get_road_openings(self)->LtaResult[RoadOpening]:
         url=build_url("RoadOpenings")
-        return LtaResult[RoadOpening].model_validate(make_request(self.headers,url))
+        return LtaResult[RoadOpening].model_validate(make_paginated_request(self.headers,url))
     def get_road_works(self)->LtaResult[RoadWork]:
         url=build_url("RoadWorks")
         return LtaResult[RoadWork].model_validate(make_paginated_request(self.headers,url))
@@ -32,7 +32,7 @@ class Roads:
         return LtaResult[TrafficIncident].model_validate(make_request(self.headers,url))
     def get_traffic_speed_bands(self)->LtaResult[TrafficSpeedBand]:
         url=build_url("v4/TrafficSpeedBands")
-        return LtaResult[TrafficSpeedBand].model_validate(make_request(self.headers,url))
+        return LtaResult[TrafficSpeedBand].model_validate(make_paginated_request(self.headers,url))
     def get_traffic_flows(self)->LtaResult[TrafficFlowDownload]:
         url=build_url("TrafficFlow")
         return LtaResult[TrafficFlowDownload].model_validate(make_request(self.headers,url))
