@@ -1,0 +1,340 @@
+from typing import Annotated, Generic, TypeVar
+
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
+
+T = TypeVar("T")
+
+
+def to_pascal(field_name: str) -> str:
+    return "".join(word.capitalize() for word in field_name.split("_"))
+
+
+def _empty_str_to_none(value):
+    return None if value == "" else value
+
+
+EmptyableInt = Annotated[int | None, BeforeValidator(_empty_str_to_none)]
+
+
+class DataMallModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_pascal, populate_by_name=True)
+
+
+class LtaResult(DataMallModel, Generic[T]):
+    odata_metadata: str = Field(alias="odata.metadata")
+    value: list[T] = Field(alias="value")
+
+
+class NextBus(DataMallModel):
+    origin_code: str
+    destination_code: str
+    estimated_arrival: str
+    monitored: int
+    latitude: str
+    longitude: str
+    visit_number: str
+    load: str
+    feature: str
+    type: str
+
+
+class BusArrivalService(DataMallModel):
+    service_no: str
+    operator: str
+    next_bus: NextBus
+    next_bus_2: NextBus
+    next_bus_3: NextBus
+
+
+class BusArrivalResponse(DataMallModel):
+    odata_metadata: str = Field(alias="odata.metadata")
+    bus_stop_code: str
+    services: list[BusArrivalService]
+
+
+class BusService(DataMallModel):
+    service_no: str
+    operator: str
+    direction: int
+    category: str
+    origin_code: str
+    destination_code: str
+    am_peak_freq: str = Field(alias="AM_Peak_Freq")
+    am_offpeak_freq: str = Field(alias="AM_Offpeak_Freq")
+    pm_peak_freq: str = Field(alias="PM_Peak_Freq")
+    pm_offpeak_freq: str = Field(alias="PM_Offpeak_Freq")
+    loop_desc: str
+
+
+class BusRoute(DataMallModel):
+    service_no: str
+    operator: str
+    direction: int
+    stop_sequence: int
+    bus_stop_code: str
+    distance: float
+    wd_first_bus: str = Field(alias="WD_FirstBus")
+    wd_last_bus: str = Field(alias="WD_LastBus")
+    sat_first_bus: str = Field(alias="SAT_FirstBus")
+    sat_last_bus: str = Field(alias="SAT_LastBus")
+    sun_first_bus: str = Field(alias="SUN_FirstBus")
+    sun_last_bus: str = Field(alias="SUN_LastBus")
+
+
+class BusStop(DataMallModel):
+    bus_stop_code: str
+    road_name: str
+    description: str
+    latitude: float
+    longitude: float
+
+
+class PlannedBusRoute(DataMallModel):
+    file_url: str
+    revision_number: int
+
+
+class PassengerVolumeDownload(DataMallModel):
+    file_url: str = Field(alias="Link")
+
+
+class FacilityMaintenance(DataMallModel):
+    line: str
+    station_code: str
+    station_name: str
+    lift_id: str | None = Field(alias="LiftID")
+    lift_desc: str
+
+
+class TrainAffectedSegment(DataMallModel):
+    line: str
+    direction: str
+    stations: str
+    free_public_bus: str
+    free_mrt_shuttle: str = Field(alias="FreeMRTShuttle")
+    mrt_shuttle_direction: str = Field(alias="MRTShuttleDirection")
+
+
+class TrainServiceAlertMessage(DataMallModel):
+    content: str
+    created_date: str
+
+
+class TrainServiceAlert(DataMallModel):
+    status: int
+    affected_segments: list[TrainAffectedSegment]
+    message: list[TrainServiceAlertMessage]
+
+
+class TrainServiceAlertsResponse(DataMallModel):
+    odata_metadata: str | None = Field(default=None, alias="odata.metadata")
+    value: TrainServiceAlert = Field(alias="value")
+
+
+class PlatformCrowdDensityRealTime(DataMallModel):
+    station: str
+    start_time: str
+    end_time: str
+    crowd_level: str
+
+
+class CrowdDensityInterval(DataMallModel):
+    start: str
+    crowd_level: str
+
+
+class ForecastCrowdDensityStation(DataMallModel):
+    station: str
+    interval: list[CrowdDensityInterval]
+
+
+class PlatformCrowdDensityForecast(DataMallModel):
+    date: str
+    stations: list[ForecastCrowdDensityStation]
+
+
+class GtfsScheduleDownload(BaseModel):
+    file_url: str = Field(alias="link")
+    timestamp: str
+
+
+class TaxiAvailability(DataMallModel):
+    latitude: float
+    longitude: float
+
+
+class TaxiStand(DataMallModel):
+    taxi_code: str
+    latitude: float
+    longitude: float
+    bfa: str
+    ownership: str
+    type: str
+    name: str
+
+
+class CarParkAvailability(DataMallModel):
+    car_park_id: str = Field(alias="CarParkID")
+    area: str
+    development: str
+    location: str
+    available_lots: int
+    lot_type: str
+    agency: str
+
+
+class EstimatedTravelTime(DataMallModel):
+    name: str
+    direction: int
+    far_end_point: str
+    start_point: str
+    end_point: str
+    est_time: int
+
+
+class RoadOpening(DataMallModel):
+    event_id: str = Field(alias="EventID")
+    start_date: str
+    end_date: str
+    svc_dept: str
+    road_name: str
+    other: str
+
+
+class RoadWork(DataMallModel):
+    event_id: str = Field(alias="EventID")
+    start_date: str
+    end_date: str
+    svc_dept: str
+    road_name: str
+    other: str
+
+
+class TrafficIncident(DataMallModel):
+    type: str
+    latitude: float
+    longitude: float
+    message: str
+
+
+class TrafficSpeedBand(DataMallModel):
+    link_id: int = Field(alias="LinkID")
+    road_name: str
+    road_category: EmptyableInt
+    speed_band: EmptyableInt
+    minimum_speed: EmptyableInt
+    maximum_speed: EmptyableInt
+    start_lon: float
+    start_lat: float
+    end_lon: float
+    end_lat: float
+
+
+class TrafficFlowDownload(DataMallModel):
+    link: str
+
+
+class PubFloodAlert(DataMallModel):
+    alert_id: str = Field(alias="alertId")
+    date_time: str = Field(alias="dateTime")
+    msg_type: str = Field(alias="msgType")
+    event: str = Field(alias="event")
+    response_type: str = Field(alias="responseType")
+    urgency: str = Field(alias="urgency")
+    severity: str = Field(alias="severity")
+    expires: str = Field(alias="expires")
+    sender_name: str = Field(alias="senderName")
+    headline: str = Field(alias="headline")
+    description: str = Field(alias="description")
+    instruction: str = Field(alias="instruction")
+    area_desc: str = Field(alias="areaDesc")
+    circle: str = Field(alias="circle")
+    status: str = Field(alias="status")
+
+
+class FaultyTrafficLight(DataMallModel):
+    alarm_id: str = Field(alias="AlarmID")
+    node_id: str = Field(alias="NodeID")
+    type: int
+    start_date: str
+    end_date: str | None = None
+    message: str
+
+
+class TrafficCamera(DataMallModel):
+    camera_id: int = Field(alias="CameraID")
+    latitude: float
+    longitude: float
+    image_link: str
+
+
+class VmsMessage(DataMallModel):
+    equipment_id: str = Field(alias="EquipmentID")
+    latitude: float
+    longitude: float
+    message: str
+
+
+class BicycleParking(DataMallModel):
+    latitude: float
+    longitude: float
+    rack_type: str
+    rack_count: int
+    shelter_indicator: str
+
+
+class GeospatialLayerDownload(DataMallModel):
+    link: str
+
+
+class EvBatchDownload(DataMallModel):
+    link: str
+
+
+class EvChargingPointId(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    id: str = Field(alias="id")
+    ev_cp_id: str = Field(alias="evCpId")
+    status: str = Field(alias="status")
+
+
+class EvPlugType(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    plug_type: str = Field(alias="plugType")
+    power_rating: str | float | None = Field(default=None, alias="powerRating")
+    charging_speed: str | float | None = Field(default=None, alias="chargingSpeed")
+    price: str | float | None = Field(default=None, alias="price")
+    price_type: str | None = Field(default=None, alias="priceType")
+    ev_ids: list[EvChargingPointId] = Field(default_factory=list, alias="evIds")
+
+
+class EvChargingPoint(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    status: str = Field(alias="status")
+    operating_hours: str = Field(default="", alias="operatingHours")
+    operator: str = Field(default="", alias="operator")
+    position: str = Field(default="", alias="position")
+    name: str = Field(default="", alias="name")
+    id: str = Field(default="", alias="id")
+    plug_types: list[EvPlugType] = Field(default_factory=list, alias="plugTypes")
+
+
+class EvChargingStation(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    address: str = Field(alias="address")
+    name: str = Field(alias="name")
+    longitude: float = Field(alias="longitude")
+    latitude: float = Field(alias="latitude")
+    location_id: str = Field(alias="locationId")
+    status: str = Field(alias="status")
+    charging_points: list[EvChargingPoint] = Field(default_factory=list, alias="chargingPoints")
+
+
+class EvChargingData(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    ev_locations_data: list[EvChargingStation] = Field(alias="evLocationsData")
+
+
+class EvChargingResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    value: EvChargingData = Field(alias="value")
