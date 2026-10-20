@@ -39,7 +39,7 @@ jobs:
 
     environment:
       name: pypi
-      url: https://pypi.org/project/lta-datamallpy/
+      url: https://pypi.org/project/lta-api-py/
 
     steps:
       - name: Retrieve release distributions
