@@ -7,17 +7,18 @@ Built on `httpx`, it ships with automatic pagination for endpoints returning mor
 ## Features
 
 - Single entry point: `DataMall` with `transport`, `traffic`, and `geospatial` namespaces
+- Typed responses: every endpoint returns validated [pydantic](https://docs.pydantic.dev) models (`LtaResult[T]` for lists), not raw dicts
 - Automatic pagination (`$skip` handling) for long endpoints
 - Persistent `httpx.Client` with a 30s timeout and explicit `close_client()`
 - Custom exceptions with response status code, message, and timestamp
-- Python `>=3.10` (`X | None` syntax, built-in generics, TypedDict-compatible)
+- Python `>=3.10` (`X | None` syntax, built-in generics), fully typed (`py.typed`-style annotations throughout)
 
 ## Installation
 
 ### From PyPI 
 
 ```bash
-pip install singapore-lta-datamall
+pip install lta-datamallpy
 ```
 
 ## Getting an API key
@@ -30,20 +31,19 @@ pip install singapore-lta-datamall
 
 ```python
 from LTADataMallpy import DataMall
-from dotenv import load_dotenv
 import os
-
-load_dotenv()
 
 dm = DataMall(api_key=os.getenv("LTA_API_KEY"))
 
-# Transport data
+# Transport data — typed pydantic models, not dicts
 arrivals = dm.transport.bus.arrival.get_bus_arrival(stopcode="83111")
-print(arrivals["Services"])
+for service in arrivals.services:
+    print(service.service_no, service.next_bus.estimated_arrival)
 
 # Traffic data
 speed_bands = dm.traffic.roads.get_traffic_speed_bands()
-print(speed_bands["value"])
+for band in speed_bands.value:
+    print(band.road_name, band.speed_band)
 ```
 
 Always close the client when you are done to release the connection pool:
@@ -239,19 +239,20 @@ data = make_request(headers, url, params={"SomeParam": "value"})
 
 ### Pagination
 
-Endpoints marked *Paginated* above go through `make_paginated_request`, which automatically walks `$skip` in 500-record pages and merges every page's `value` list into a single result dict.
+Endpoints marked *Paginated* above go through `make_paginated_request`, which automatically walks `$skip` in 500-record pages and merges every page's `value` list into a single response before it is validated into the model.
 
 ## Error handling and debugging
 
-`make_request` maps known HTTP statuses to descriptive exceptions (all in `LTADataMallpy.helpers`, subclasses of `Exception`):
+`make_request` maps known HTTP statuses to descriptive exceptions (all in `LTADataMallpy.helpers`, subclasses of `DataMallError`):
 
 | HTTP status | Exception                  | Meaning                                       |
-| ----------- | --------------------------- | --------------------------------------------- |
-| 401 / 403 / 404 | `DataMallPermissionError` | Invalid/missing API key               |
-| 500         | `DataMallBackendError`      | LTA backend server error                      |
-| 429         | `DataMallRateLimitError`    | Rate limit hit; slow your request frequency   |
+| ----------- | ------------------------- | --------------------------------------------- |
+| 401 / 403   | `DataMallPermissionError` | Invalid/missing API key                       |
+| 404         | `DataMallNotFoundError`   | Requested data not available for this account |
+| 500 / 502 / 503 | `DataMallBackendError` | LTA backend server error                      |
+| 429         | `DataMallRateLimitError`  | Rate limit hit; slow your request frequency   |
 
-Each raised exception carries a `dict` describing the failure, e.g. `{"error": {"code": 401, "message": "...", "timestamp": "2026-09-13 12:00:00"}}`. Any other status passes through `httpx.Response.raise_for_status()`.
+Every `DataMallError` exposes `.status_code` and `.detail` (the API's error message when parseable) and stringifies as `"{status_code} {detail}"`. Any other status passes through `httpx.Response.raise_for_status()`.
 
 ```python
 from LTADataMallpy import DataMall
@@ -262,9 +263,9 @@ dm = DataMall(api_key="invalid-key")
 try:
     dm.transport.bus.arrival.get_bus_arrival("83111")
 except DataMallPermissionError as e:
-    print("Bad key:", e.args[0])
+    print("Bad key:", e.status_code, e.detail)
 except DataMallRateLimitError as e:
-    print("Slow down:", e.args[0])
+    print("Slow down:", e.status_code, e.detail)
 ```
 
 ### Debugging tips
@@ -277,11 +278,13 @@ except DataMallRateLimitError as e:
 ## Development
 
 ```bash
-pip install -e .            # editable install from source
-uv build                    # build sdist + wheel into dist/
+uv sync --group dev       # install with dev extras (pytest, python-dotenv)
+uv run pytest tests/      # full suite; hits the live API, needs LTADATAMALL_API_KEY in .env
+uv build                  # build sdist + wheel into dist/
+uvx twine check dist/*    # validate package metadata
 ```
 
-No tests are currently shipped (`test/` is empty).
+Tests read `LTADATAMALL_API_KEY` from a `.env` file (git-ignored) or the environment; without it they skip. Requests are paced ~3s apart to respect LTA rate limits.
 
 ## License
 

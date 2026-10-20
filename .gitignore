@@ -1,3 +1,10 @@
-__pycache__
+__pycache__/
+*.py[cod]
 .env
-.venv
+.venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.idea/
+LTA_DataMall_API_User_Guide.pdf
