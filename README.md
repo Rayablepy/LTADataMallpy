@@ -18,7 +18,7 @@ Built on `httpx`, it ships with automatic pagination for endpoints returning mor
 ### From PyPI 
 
 ```bash
-pip install lta-datamallpy
+pip install lta-api-py
 ```
 
 ## Getting an API key
