@@ -11,20 +11,6 @@ def build_headers(api_key:str,accept:str|None=None) -> dict[str,str]:
 def build_url(endpoint:str) -> str:
     return base_url+endpoint
 
-client = None
-def create_client() -> httpx.Client:
-    global client
-    if client is None:
-        client = httpx.Client(timeout=30.0)
-    return client
-
-#may be open to exports
-def close_client() -> None:
-    global client
-    if client is not None:
-        client.close()
-        client = None
-
 #Custom exceptions, open to updates
 class DataMallError(Exception):
     """Base class for LTA DataMall API errors"""
@@ -66,8 +52,8 @@ def extract_error_detail(response) -> str:
             return str(message)
     return response.reason_phrase or "Unknown error"
 
-def make_request(headers,url,params=None):
-    r=create_client().get(url,headers=headers,params=params)
+def make_request(client: httpx.Client, headers, url, params=None):
+    r=client.get(url,headers=headers,params=params)
     if r.status_code in (401,403):
         raise DataMallPermissionError(r.status_code, extract_error_detail(r))
     elif r.status_code in (404,):
@@ -79,13 +65,13 @@ def make_request(headers,url,params=None):
     r.raise_for_status()
     return r.json()
 
-def make_paginated_request(headers:dict[str,str],url:str,params:dict[str,str] | None = None) -> dict:
+def make_paginated_request(client: httpx.Client, headers:dict[str,str],url:str,params:dict[str,str] | None = None) -> dict:
     params = dict(params or {})
     skip = 0
     combined = None
     while True:
         params["$skip"] = skip
-        page = make_request(headers, url, params)
+        page = make_request(client, headers, url, params)
         batch = page.get("value", [])
         if combined is None:
             combined = page
