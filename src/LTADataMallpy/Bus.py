@@ -1,4 +1,6 @@
 
+import httpx
+
 from .helpers import build_headers, build_url, make_request, make_paginated_request
 from .models import (
     BusArrivalResponse,
@@ -11,16 +13,18 @@ from .models import (
 )
 
 class Bus:
-    def __init__(self,api_key:str,accept:str|None=None) -> None:
+    def __init__(self,api_key:str,accept:str|None,client:httpx.Client) -> None:
         self.headers=build_headers(api_key,accept)
-        self.arrival=BusArrival(self.headers)
-        self.services=BusServices(self.headers)
-        self.routes=BusRoutes(self.headers)
-        self.stops=BusStops(self.headers)
+        self.client=client
+        self.arrival=BusArrival(self.headers,client)
+        self.services=BusServices(self.headers,client)
+        self.routes=BusRoutes(self.headers,client)
+        self.stops=BusStops(self.headers,client)
 
 class BusArrival:
-    def __init__(self,headers:dict[str,str]) -> None:
+    def __init__(self,headers:dict[str,str],client:httpx.Client) -> None:
         self.headers=headers
+        self.client=client
         self.url=build_url("v3/BusArrival")
     def get_bus_arrival(self,stopcode:str,serviceno:str|None=None) -> BusArrivalResponse:
         params={
@@ -28,32 +32,35 @@ class BusArrival:
         }
         if serviceno:
             params["ServiceNo"]=serviceno
-        return BusArrivalResponse.model_validate(make_request(self.headers,self.url,params))
+        return BusArrivalResponse.model_validate(make_request(self.client,self.headers,self.url,params))
 
 class BusServices:
-    def __init__(self,headers:dict[str,str]) -> None:
+    def __init__(self,headers:dict[str,str],client:httpx.Client) -> None:
         self.headers=headers
+        self.client=client
         self.url=build_url("BusServices")
     def get_bus_services(self,serviceno:str|None=None) -> LtaResult[BusService]:
         params=None
         if serviceno:
             params={"ServiceNo":serviceno}
-        return LtaResult[BusService].model_validate(make_paginated_request(self.headers,self.url,params))
+        return LtaResult[BusService].model_validate(make_paginated_request(self.client,self.headers,self.url,params))
 
 class BusRoutes:
-    def __init__(self,headers:dict[str,str]) -> None:
+    def __init__(self,headers:dict[str,str],client:httpx.Client) -> None:
         self.headers=headers
+        self.client=client
 
     def get_bus_routes(self) -> LtaResult[BusRoute]:
         self.url = build_url("BusRoutes")
-        return LtaResult[BusRoute].model_validate(make_paginated_request(self.headers,self.url))
+        return LtaResult[BusRoute].model_validate(make_paginated_request(self.client,self.headers,self.url))
     def get_planned_routes(self)->LtaResult[PlannedBusRoute]:
         self.url = build_url("PlannedBusRoutes")
-        return LtaResult[PlannedBusRoute].model_validate(make_request(self.headers,self.url))
+        return LtaResult[PlannedBusRoute].model_validate(make_request(self.client,self.headers,self.url))
 
 class BusStops:
-    def __init__(self,headers:dict[str,str]) -> None:
+    def __init__(self,headers:dict[str,str],client:httpx.Client) -> None:
         self.headers=headers
+        self.client=client
         self.url=build_url("BusStops")
     def get_bus_stops(self,stopcode:str|None=None) -> LtaResult[BusStop]:
         params=None
@@ -61,7 +68,7 @@ class BusStops:
             params={
                 "BusStopCode":stopcode
             }
-        return LtaResult[BusStop].model_validate(make_paginated_request(self.headers,self.url,params))
+        return LtaResult[BusStop].model_validate(make_paginated_request(self.client,self.headers,self.url,params))
     def get_pvolume_bus_stop(self,date:str|None=None,origin_destination:bool|None=None) -> LtaResult[PassengerVolumeDownload]:
         if origin_destination:
             url=build_url("PV/ODBus")
@@ -70,4 +77,4 @@ class BusStops:
         params=None
         if date:
             params={"Date":date}
-        return LtaResult[PassengerVolumeDownload].model_validate(make_request(self.headers,url,params))
+        return LtaResult[PassengerVolumeDownload].model_validate(make_request(self.client,self.headers,url,params))

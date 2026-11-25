@@ -8,3 +8,4 @@ build/
 .pytest_cache/
 .idea/
 LTA_DataMall_API_User_Guide.pdf
+.openidea
