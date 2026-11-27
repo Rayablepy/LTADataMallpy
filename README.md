@@ -9,7 +9,7 @@ Built on `httpx`, it ships with automatic pagination for endpoints returning mor
 - Single entry point: `DataMall` with `transport`, `traffic`, and `geospatial` namespaces
 - Typed responses: every endpoint returns validated [pydantic](https://docs.pydantic.dev) models (`LtaResult[T]` for lists), not raw dicts
 - Automatic pagination (`$skip` handling) for long endpoints
-- Persistent `httpx.Client` with a 30s timeout and explicit `close_client()`
+- Persistent `httpx.Client` with a 30s timeout, owned by `DataMall` and closed automatically via context manager
 - Custom exceptions with response status code, message, and timestamp
 - Python `>=3.10` (`X | None` syntax, built-in generics), fully typed (`py.typed`-style annotations throughout)
 
@@ -33,26 +33,19 @@ pip install lta-api-py
 from LTADataMallpy import DataMall
 import os
 
-dm = DataMall(api_key=os.getenv("LTA_API_KEY"))
+with DataMall(api_key=os.getenv("LTA_API_KEY")) as dm:
+    # Transport data — typed pydantic models, not dicts
+    arrivals = dm.transport.bus.arrival.get_bus_arrival(stopcode="83111")
+    for service in arrivals.services:
+        print(service.service_no, service.next_bus.estimated_arrival)
 
-# Transport data — typed pydantic models, not dicts
-arrivals = dm.transport.bus.arrival.get_bus_arrival(stopcode="83111")
-for service in arrivals.services:
-    print(service.service_no, service.next_bus.estimated_arrival)
-
-# Traffic data
-speed_bands = dm.traffic.roads.get_traffic_speed_bands()
-for band in speed_bands.value:
-    print(band.road_name, band.speed_band)
+    # Traffic data
+    speed_bands = dm.traffic.roads.get_traffic_speed_bands()
+    for band in speed_bands.value:
+        print(band.road_name, band.speed_band)
 ```
 
-Always close the client when you are done to release the connection pool:
-
-```python
-from LTADataMallpy.helpers import close_client
-# ... your requests ...
-close_client()
-```
+Using `DataMall` as a context manager releases the connection pool automatically at the end of the block. If you construct it directly (`dm = DataMall(...)`), call `dm.close()` when done.
 
 ## API reference
 
@@ -66,7 +59,7 @@ from LTADataMallpy import DataMall
 dm = DataMall(api_key: str, accept: str | None = None)
 ```
 
-Raises `ValueError` if `api_key` is empty or missing. Exposes three namespaces:
+Supports the context-manager protocol (`with DataMall(...) as dm:`), which closes the underlying `httpx.Client` on exit; `dm.close()` can also be called manually. Raises `ValueError` if `api_key` is empty or missing. Exposes three namespaces:
 
 | Attribute      | Type                        | Description                          |
 | -------------- | --------------------------- | ------------------------------------ |
@@ -216,25 +209,25 @@ from LTADataMallpy.helpers import (
     build_url,            # join an endpoint to the DataMall base URL
     make_request,         # GET one page; raises custom errors in the helpers module
     make_paginated_request,  # fetch all pages, combining "value" lists
-    create_client,        # lazily create/reuse the persistent httpx.Client
-    close_client,         # close the persistent client (self-heals on next use)
 )
 ```
 
 Example of a custom call:
 
 ```python
+import httpx
 from LTADataMallpy.helpers import build_headers, build_url, make_request
 
-headers = build_headers(API_KEY)
-url = build_url("SomeEndpoint")
-data = make_request(headers, url, params={"SomeParam": "value"})
+with httpx.Client(timeout=30.0) as client:
+    headers = build_headers(API_KEY)
+    url = build_url("SomeEndpoint")
+    data = make_request(client, headers, url, params={"SomeParam": "value"})
 ```
 
 ### Persistent client
 
-- The shared `httpx.Client` is created lazily on the first request (with `timeout=30.0`) and reused for every call, keeping TCP/TLS connections alive.
-- Call `close_client()` at the end of a script to free resources. It is safe to call mid-run: the next request transparently recreates the client.
+- Each `DataMall` instance owns an `httpx.Client` (with `timeout=30.0`), reused for every call in that instance.
+- Use `DataMall` as a context manager (or call `dm.close()`) to release the connection pool.
 - `httpx.Client` is thread-safe, so the client can be shared across threads.
 
 ### Pagination

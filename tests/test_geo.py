@@ -5,7 +5,7 @@ import pytest
 from dotenv import load_dotenv
 
 from LTADataMallpy import DataMall
-from LTADataMallpy.helpers import build_url, close_client
+from LTADataMallpy.helpers import build_url
 from LTADataMallpy.models import GeospatialLayerDownload, LtaResult
 
 load_dotenv()
@@ -63,7 +63,8 @@ def run_direct() -> None:
         except Exception as exc:
             failures += 1
             print(f"    FAIL     -> {type(exc).__name__}: {exc}")
-    close_client()
+    if client is not None:
+        client.close()
     print(f"\nGeo Tests Complete: {len(tests) - failures}/{len(tests)} passed")
     raise SystemExit(1 if failures else 0)
 
